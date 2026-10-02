@@ -107,10 +107,14 @@ jobs:
     permissions:
       contents: write
     steps:
+      # Scoped to our own artifact name: docker/build-push-action also
+      # uploads a "<owner>~<repo>~<id>.dockerbuild" build-record artifact to
+      # the same run (since v6), and an unscoped download would pull that in
+      # too and collide with it during flattening.
       - uses: actions/download-artifact@v8
-      - name: Flatten downloaded artifacts
-        run: |
-          for d in */; do [ -d "$d" ] && mv "$d"* ./; done
+        with:
+          pattern: uc-intg-${{ env.INTG_NAME }}-*
+          merge-multiple: true
       - name: Hash
         run: sha256sum *.tar.gz > christie-m4k25.hash
       - uses: ncipollo/release-action@v1
