@@ -1,0 +1,32 @@
+{
+  "driver_id": "christie_m4k25",
+  "version": "1.0.0",
+  "min_core_api": "0.21.0",
+  "name": { "en": "Christie M 4K25 RGB" },
+  "icon": "uc:integration",
+  "description": {
+    "en": "Control a Christie M 4K25 RGB projector from the Unfolded Circle Remote: power, input, shutter, brightness, test patterns, LiteLOC, and lens motors, over the projector's own Ethernet serial API."
+  },
+  "developer": {
+    "name": "imsatasia",
+    "email": "imsatasia@yahoo.com"
+  },
+  "home_page": "https://github.com/imsatasia/uc-intg-christie-m4k25",
+  "release_date": "2026-09-28",
+  "setup_data_schema": {
+    "title": { "en": "Christie M 4K25 RGB Setup" },
+    "settings": [
+      {
+        "id": "info",
+        "label": { "en": "Setup information" },
+        "field": {
+          "label": {
+            "value": {
+              "en": "Enter the projector's IP address on the next screen. It should have a DHCP reservation -- the Ethernet serial API (TCP 3002) has no discovery of its own."
+            }
+          }
+        }
+      }
+    ]
+  }
+}

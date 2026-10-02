@@ -1,0 +1,21 @@
+# Builds the image from source (see examples/docker-compose.yml for a
+# ready-to-run version that pulls the published image instead) --
+# container_name/UC_INTEGRATION_HTTP_PORT only need to be unique if another
+# UC3 driver is ever added alongside this one.
+services:
+  christie-m4k25:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: uc-intg-christie-m4k25
+    restart: unless-stopped
+    # Required: mDNS discovery and the remote's direct WebSocket connection
+    # both need to see the real LAN, not a bridge-NAT'd container IP.
+    network_mode: host
+    volumes:
+      - ./data:/config
+    environment:
+      - UC_CONFIG_HOME=/config
+      - UC_INTEGRATION_INTERFACE=0.0.0.0
+      - UC_INTEGRATION_HTTP_PORT=9090
+      - UC_DISABLE_MDNS_PUBLISH=false

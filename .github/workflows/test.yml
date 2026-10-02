@@ -1,0 +1,67 @@
+name: CI
+
+# Runs on every push/PR to main -- unlike build.yml (tag-triggered release
+# pipeline only), this is what actually gates day-to-day changes. The
+# "Secret scan / TruffleHog" job name matches the one build.yml produces, so
+# branch protection can require it regardless of which workflow reported it.
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  secrets:
+    name: Secret scan
+    uses: ./.github/workflows/secret-scan.yml
+
+  quality:
+    name: Quality
+    needs: [secrets]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Sync dependencies
+        run: uv sync --group dev
+
+      - name: Black
+        run: uv run black uc_intg_christie_m4k25 tests --check
+
+      - name: isort
+        run: uv run isort uc_intg_christie_m4k25 tests --check
+
+  tests:
+    name: Tests (Python ${{ matrix.python-version }})
+    needs: [secrets]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Sync dependencies
+        run: uv sync --group dev
+
+      - name: Pytest
+        run: uv run pytest -v

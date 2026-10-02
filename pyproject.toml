@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=65.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "uc-intg-christie-m4k25"
+version = "1.0.0"
+description = "Christie M 4K25 RGB projector integration for the Unfolded Circle Remote"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "imsatasia", email = "imsatasia@yahoo.com" }]
+dependencies = [
+    "ucapi>=0.7.0",
+    "christie-mseries>=1.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "black>=24.0.0",
+    "isort>=5.13.0",
+    "pylint>=3.0.0",
+    "flake8>=7.0.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/imsatasia/uc-intg-christie-m4k25"
+"Bug Reports" = "https://github.com/imsatasia/uc-intg-christie-m4k25/issues"
+
+[tool.setuptools]
+packages = ["uc_intg_christie_m4k25"]
+
+[tool.setuptools.package-data]
+"uc_intg_christie_m4k25" = ["*.json"]
+
+[project.scripts]
+uc-intg-christie-m4k25 = "uc_intg_christie_m4k25.driver:run"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
