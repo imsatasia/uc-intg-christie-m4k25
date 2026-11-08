@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "uc-intg-christie-m4k25"
-version = "1.0.0"
+version = "1.1.0"
 description = "Christie M 4K25 RGB projector integration for the Unfolded Circle Remote"
 readme = "README.md"
 requires-python = ">=3.11"
