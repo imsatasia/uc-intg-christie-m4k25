@@ -12,7 +12,7 @@ license = { text = "MIT" }
 authors = [{ name = "imsatasia", email = "imsatasia@yahoo.com" }]
 dependencies = [
     "ucapi>=0.7.0",
-    "christie-mseries>=1.0.0",
+    "christie-mseries>=1.2.0",
 ]
 
 [dependency-groups]
