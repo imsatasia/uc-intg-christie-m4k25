@@ -1,6 +1,6 @@
 {
   "driver_id": "christie_m4k25",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "min_core_api": "0.21.0",
   "name": { "en": "Christie M 4K25 RGB" },
   "icon": "uc:integration",
@@ -12,7 +12,7 @@
     "email": "imsatasia@yahoo.com"
   },
   "home_page": "https://github.com/imsatasia/uc-intg-christie-m4k25",
-  "release_date": "2026-09-28",
+  "release_date": "2026-11-08",
   "setup_data_schema": {
     "title": { "en": "Christie M 4K25 RGB Setup" },
     "settings": [
