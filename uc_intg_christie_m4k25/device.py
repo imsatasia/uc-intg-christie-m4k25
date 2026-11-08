@@ -31,6 +31,10 @@ import logging
 from typing import Any, Callable
 
 from christie_mseries import (
+    THREE_D_DARK_INTERVAL_MAX,
+    THREE_D_DARK_INTERVAL_MIN,
+    THREE_D_EMITTER_DELAY_MAX,
+    THREE_D_EMITTER_DELAY_MIN,
     ChristieConnectionError,
     ChristieError,
     ChristieM4K25,
@@ -168,6 +172,54 @@ class ChristieDevice:
 
     async def set_test_pattern(self, pattern: str) -> None:
         await self._run(lambda p: p.set_test_pattern(pattern))
+        await self.refresh()
+
+    async def set_3d_mode(self, mode: str) -> None:
+        await self._run(lambda p: p.set_3d_mode(mode))
+        await self.refresh()
+
+    async def set_3d_sync_output(self, output: str) -> None:
+        await self._run(lambda p: p.set_3d_sync_output(output))
+        await self.refresh()
+
+    async def set_3d_input_inverted(self, inverted: bool) -> None:
+        await self._run(lambda p: p.set_3d_input_inverted(inverted))
+        await self.refresh()
+
+    async def set_3d_test_pattern(self, enabled: bool) -> None:
+        def _set(p: ChristieM4K25) -> None:
+            if enabled:
+                p.enable_3d_test_pattern()
+            else:
+                p.disable_3d_test_pattern()
+
+        await self._run(_set)
+        await self.refresh()
+
+    async def step_3d_delay(self, delta: int) -> None:
+        """Nudge the 3D sync delay by `delta`, clamped to its published range.
+        Refused by the projector outside the packed 3D modes (a CONFLICT)."""
+
+        def _step(p: ChristieM4K25) -> None:
+            value = p.get_3d_emitter_delay() + delta
+            p.set_3d_emitter_delay(
+                max(THREE_D_EMITTER_DELAY_MIN, min(THREE_D_EMITTER_DELAY_MAX, value))
+            )
+
+        await self._run(_step)
+        await self.refresh()
+
+    async def step_3d_dark_interval(self, delta: int) -> None:
+        """Nudge the 3D dark interval by `delta`, clamped to its published
+        range. Refused by the projector outside the packed 3D modes."""
+
+        def _step(p: ChristieM4K25) -> None:
+            value = p.get_3d_dark_interval() + delta
+            p.set_3d_dark_interval(
+                max(THREE_D_DARK_INTERVAL_MIN, min(THREE_D_DARK_INTERVAL_MAX, value))
+            )
+
+        await self._run(_step)
         await self.refresh()
 
     async def open_shutter(self) -> None:

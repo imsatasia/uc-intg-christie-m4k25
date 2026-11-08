@@ -54,11 +54,11 @@ wheels = [
 
 [[package]]
 name = "christie-mseries"
-version = "1.1.0"
+version = "1.2.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/85/5b/80b113075ca71d9c004831c4fdf2b75233a5d662fe3e8e5a3b28140cc870/christie_mseries-1.1.0.tar.gz", hash = "sha256:ec8e6fac53ba68d4de0a8aa354f6c628047d09bb7f4c91b59825ef730adab5ea", size = 40558, upload-time = "2026-09-24T04:58:54.907Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/25/be/ca6609f930be4a9ad4d9cbc2f09c9d26dd071cb3d8b64fc9ffba25a543df/christie_mseries-1.2.0.tar.gz", hash = "sha256:b98c10872d73d9f0a348e9933649725d588e02fda3dadddaaeebec12c472a486", size = 51258, upload-time = "2026-11-08T21:53:37.775Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9a/11/517ac8feae045707588d3213bb79fcec8aeffeea5357af6bbbf0958a79f3/christie_mseries-1.1.0-py3-none-any.whl", hash = "sha256:2e8c756cc70c39d10fcc2752e4aeaaff4f78a2dc116d8fcee2ad659e693c72ee", size = 29579, upload-time = "2026-09-24T04:58:53.628Z" },
+    { url = "https://files.pythonhosted.org/packages/f7/a4/444ddf9e1af07f16360ff1e8eb07e90499a88aa5129cfe77e5d35d2e9696/christie_mseries-1.2.0-py3-none-any.whl", hash = "sha256:b6ff7d4a729fea7583ad52a9ed49e2cadd339343cf4ae7dacd58c2129f05ab61", size = 35024, upload-time = "2026-11-08T21:53:36.294Z" },
 ]
 
 [[package]]
@@ -395,7 +395,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "christie-mseries", specifier = ">=1.0.0" },
+    { name = "christie-mseries", specifier = ">=1.2.0" },
     { name = "ucapi", specifier = ">=0.7.0" },
 ]
 

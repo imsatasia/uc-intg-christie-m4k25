@@ -37,6 +37,13 @@ LENS_STEP = 10
 # [BRIGHTNESS_MIN_PERCENT, BRIGHTNESS_MAX_PERCENT] range (30-100%).
 BRIGHTNESS_STEP = 5.0
 
+# Step sizes for the remote entity's 3D_DELAY_UP/DOWN and 3D_DARK_UP/DOWN
+# commands. The projector publishes no unit for either value (see
+# py-christie-mseries's README), so these are raw steps through ranges of 2001
+# and 2751 values; requests are clamped to the library's published ranges.
+THREE_D_DELAY_STEP = 10
+THREE_D_DARK_INTERVAL_STEP = 50
+
 # Simple command names for the remote entity. Uppercase, no whitespace,
 # <=20 chars -- see references/protocol-and-entities.md.
 CMD_SHUTTER_OPEN = "SHUTTER_OPEN"
@@ -57,6 +64,14 @@ CMD_LENS_UP = "LENS_UP"
 CMD_LENS_DOWN = "LENS_DOWN"
 CMD_LENS_LEFT = "LENS_LEFT"
 CMD_LENS_RIGHT = "LENS_RIGHT"
+CMD_3D_OFF = "3D_OFF"
+CMD_3D_AUTO = "3D_AUTO"
+CMD_3D_TEST_ON = "3D_TEST_ON"
+CMD_3D_TEST_OFF = "3D_TEST_OFF"
+CMD_3D_DELAY_UP = "3D_DELAY_UP"
+CMD_3D_DELAY_DOWN = "3D_DELAY_DOWN"
+CMD_3D_DARK_UP = "3D_DARK_UP"
+CMD_3D_DARK_DOWN = "3D_DARK_DOWN"
 
 SIMPLE_COMMANDS = [
     CMD_SHUTTER_OPEN,
@@ -77,4 +92,12 @@ SIMPLE_COMMANDS = [
     CMD_LENS_DOWN,
     CMD_LENS_LEFT,
     CMD_LENS_RIGHT,
+    CMD_3D_OFF,
+    CMD_3D_AUTO,
+    CMD_3D_TEST_ON,
+    CMD_3D_TEST_OFF,
+    CMD_3D_DELAY_UP,
+    CMD_3D_DELAY_DOWN,
+    CMD_3D_DARK_UP,
+    CMD_3D_DARK_DOWN,
 ]

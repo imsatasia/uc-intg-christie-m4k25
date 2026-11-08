@@ -5,7 +5,7 @@
   "name": { "en": "Christie M 4K25 RGB" },
   "icon": "uc:integration",
   "description": {
-    "en": "Control a Christie M 4K25 RGB projector from the Unfolded Circle Remote: power, input, shutter, brightness, test patterns, LiteLOC, and lens motors, over the projector's own Ethernet serial API."
+    "en": "Control a Christie M 4K25 RGB projector from the Unfolded Circle Remote: power, input, shutter, brightness, test patterns, 3D, LiteLOC, and lens motors, over the projector's own Ethernet serial API."
   },
   "developer": {
     "name": "imsatasia",

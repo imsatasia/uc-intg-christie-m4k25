@@ -51,6 +51,11 @@ IDs are derived from the configured IP, so a changed IP means re-adding the inte
 | Christie M 4K25 RGB | `remote` | Power on/off/toggle plus the full simple-command surface: shutter, freeze, auto setup, LiteLOC, brightness step, lens home/calibrate/nudge. Ships a "Christie Control" UI page. |
 | Christie M 4K25 RGB Input | `select` | Main video input (SIN) by port label -- a second, redundant control point for the same command the media_player's `select_source` already offers, kept for a standalone input widget on a dashboard. |
 | Christie M 4K25 RGB Test Pattern | `select` | Internal test patterns (ITP) -- refused while the projector is in standby. |
+| Christie M 4K25 RGB 3D Mode | `select` | Off, Auto Detect, Multi-Flash 3D, Side-by-Side 3D, Top-and-Bottom 3D, Frame Packing 3D (TDM). Option names come from the library's `THREE_D_MODES`. |
+| Christie M 4K25 RGB 3D Sync Output | `select` | To Emitter / To Next Input (TDO). The projector only accepts it in the packed modes (Side-by-Side, Top-and-Bottom, Frame Packing); elsewhere the command is refused with a conflict. |
+| Christie M 4K25 RGB 3D Invert Eyes | `switch` | Swaps left and right (TDN). The opposite of the sync output: refused in the packed modes. |
+| Christie M 4K25 RGB 3D Test Pattern | `switch` | The scrolling sync-check pattern (TDT). Works in every mode while the projector is on. |
+| Christie M 4K25 RGB 3D Sync / 3D Darktime | `sensor` | Read-only: the projector's own wording, e.g. "Valid HDMI 3D Sync" and "Achieved" / "Not Achieved"; "N/A" with no 3D signal. |
 | Christie M 4K25 RGB Shutter | `switch` | ON = shutter open (light reaches the screen). |
 | Christie M 4K25 RGB LiteLOC | `switch` | Holds brightness/colour constant over time, trading off spare laser headroom. |
 | Christie M 4K25 RGB Status | `sensor` | The projector's own power-state wording, e.g. "Standby Mode". |
@@ -65,6 +70,13 @@ continuous slider here -- unlike the Home Assistant integration's `number.*` ent
 reachable instead as stepped remote simple-commands (`FOCUS_NEAR`/`FOCUS_FAR`, `ZOOM_IN`/
 `ZOOM_OUT`, `LENS_UP`/`DOWN`/`LEFT`/`RIGHT`, `BRIGHTNESS_UP`/`DOWN`), which also matches how a
 physical remote would offer them.
+
+The two numeric 3D controls are in the same position: the 3D sync delay and the 3D dark interval
+are stepped with `3D_DELAY_UP`/`3D_DELAY_DOWN` (10 per press) and `3D_DARK_UP`/`3D_DARK_DOWN` (50
+per press), clamped to the projector's own published ranges (−1000 to 1000 and 250 to 3000). The
+projector publishes no unit for either, so they are raw steps. Both are only accepted in the packed
+3D modes. `3D_OFF`, `3D_AUTO`, `3D_TEST_ON` and `3D_TEST_OFF` are shortcuts for the mode and test
+pattern, and a second "Christie 3D" page on the remote entity puts all eight on screen.
 
 ## Development
 
@@ -93,8 +105,8 @@ To add or bump a dependency, edit `pyproject.toml` and run `uv lock`, then commi
   no persistent device connection to tear down (every call already opens and closes its own), so
   `ENTER_STANDBY`/`EXIT_STANDBY` stop and restart the poll loop instead, and `EXIT_STANDBY` forces
   an immediate re-sync rather than trusting the last snapshot from before the process was frozen.
-- **Standby-refused commands**: `SIN` (input), `ITP` (test pattern), and the lens motors are
-  rejected with "Disabled Control" while the projector is off; a `ChristieError` from the library
+- **Standby-refused commands**: `SIN` (input), `ITP` (test pattern), every 3D control, and the lens
+  motors are rejected with "Disabled Control" while the projector is off; a `ChristieError` from the library
   maps to `StatusCodes.CONFLICT`, distinct from a connectivity failure (`SERVER_ERROR`).
 
 ## Layout
