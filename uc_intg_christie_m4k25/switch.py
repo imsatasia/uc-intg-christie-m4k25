@@ -1,8 +1,9 @@
 """
-Switch entities for the Christie M 4K25 RGB integration: shutter and
-LiteLOC. Both are also reachable as remote.py simple_commands, for a physical
-button mapping -- the same overlap between entities uc-intg-madvr uses for
-one physical device's power state.
+Switch entities for the Christie M 4K25 RGB integration: shutter, LiteLOC, 3D
+eye inversion and the 3D sync test pattern. Shutter and LiteLOC are also
+reachable as remote.py simple_commands, for a physical button mapping -- the
+same overlap between entities uc-intg-madvr uses for one physical device's
+power state.
 
 :license: MIT, see LICENSE for more details.
 """
@@ -89,4 +90,30 @@ class ChristieLiteLocSwitch(_ChristieSwitch):
             name=f"{config.name} LiteLOC",
             turn_on=lambda: device.set_liteloc(True),
             turn_off=lambda: device.set_liteloc(False),
+        )
+
+
+class ChristieThreeDInvertSwitch(_ChristieSwitch):
+    """ON = left and right eyes swapped (TDN). The projector refuses this in the
+    packed 3D modes, where the timing controls take over."""
+
+    def __init__(self, config: ChristieConfig, device: ChristieDevice) -> None:
+        super().__init__(
+            identifier=entity_id("switch", config.host, "3d_invert"),
+            name=f"{config.name} 3D Invert Eyes",
+            turn_on=lambda: device.set_3d_input_inverted(True),
+            turn_off=lambda: device.set_3d_input_inverted(False),
+        )
+
+
+class ChristieThreeDTestPatternSwitch(_ChristieSwitch):
+    """ON = the scrolling 3D sync test pattern is shown (TDT). Works in every
+    3D mode while the projector is on."""
+
+    def __init__(self, config: ChristieConfig, device: ChristieDevice) -> None:
+        super().__init__(
+            identifier=entity_id("switch", config.host, "3d_test_pattern"),
+            name=f"{config.name} 3D Test Pattern",
+            turn_on=lambda: device.set_3d_test_pattern(True),
+            turn_off=lambda: device.set_3d_test_pattern(False),
         )

@@ -40,6 +40,15 @@ stepped `remote` simple-commands instead (`BRIGHTNESS_UP`/`DOWN`, `FOCUS_NEAR`/`
 also matches how a physical remote naturally offers them. If ucapi ever adds a `number` entity
 type, revisit this.
 
+The 3D sync delay (`TDD`) and dark interval (`DRK`) fall under the same rule, as
+`3D_DELAY_UP`/`DOWN` and `3D_DARK_UP`/`DOWN`. `device.py`'s `step_3d_delay`/`step_3d_dark_interval`
+clamp to the library's `THREE_D_*_MIN/MAX` before writing, because the projector clamps silently
+and the library refuses out-of-range values. Both, and the 3D sync output select, are refused by
+the projector outside the packed 3D modes (and the invert switch inside them) -- that arrives as
+a `ChristieError`, i.e. `CONFLICT`. The entities are deliberately not greyed out for it: a ucapi
+select or switch has no availability besides the whole entity being `UNAVAILABLE`, which would
+also hide its value.
+
 ## Command-name-to-protocol dispatch is a single dict, and it's tested
 
 `remote.py`'s `_build_command_map()` is a module-level function (not a method) mapping every

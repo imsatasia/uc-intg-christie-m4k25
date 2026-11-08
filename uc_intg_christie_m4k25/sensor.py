@@ -1,7 +1,7 @@
 """
 Sensor entities for the Christie M 4K25 RGB integration: status text, input
-name, operating hours, intake temperature, and an alarm-present binary
-sensor. Sensors take no cmd_handler -- ucapi's Sensor entity supports no
+name, operating hours, intake temperature, an alarm-present binary sensor, and
+the two read-only 3D readings. Sensors take no cmd_handler -- ucapi's Sensor entity supports no
 commands at all (see entity_sensor.md: "The sensor entity doesn't support
 any commands.") -- so this module only builds the entities; driver.py's
 _apply_snapshot() pushes their values.
@@ -85,4 +85,28 @@ def build_alarms_sensor(config: ChristieConfig) -> Sensor:
             Attributes.UNIT: _ALARM_UNIT,
         },
         device_class=DeviceClasses.BINARY,
+    )
+
+
+def build_three_d_sync_sensor(config: ChristieConfig) -> Sensor:
+    """The projector's own wording for the 3D sync state, e.g. "Valid HDMI 3D
+    Sync"; "N/A" when no 3D signal is being shown."""
+    return Sensor(
+        identifier=entity_id("sensor", config.host, "3d_sync"),
+        name=f"{config.name} 3D Sync",
+        features=[],
+        attributes={Attributes.STATE: States.ON, Attributes.VALUE: ""},
+        device_class=DeviceClasses.CUSTOM,
+    )
+
+
+def build_three_d_darktime_sensor(config: ChristieConfig) -> Sensor:
+    """Whether the 3D dark interval fits the frame rate: "Achieved" or "Not
+    Achieved"; "N/A" when no 3D signal is being shown."""
+    return Sensor(
+        identifier=entity_id("sensor", config.host, "3d_darktime"),
+        name=f"{config.name} 3D Darktime",
+        features=[],
+        attributes={Attributes.STATE: States.ON, Attributes.VALUE: ""},
+        device_class=DeviceClasses.CUSTOM,
     )

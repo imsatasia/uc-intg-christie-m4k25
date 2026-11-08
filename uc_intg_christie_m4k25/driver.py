@@ -31,16 +31,28 @@ from uc_intg_christie_m4k25.media_player import (
     power_state_to_media_player_state,
 )
 from uc_intg_christie_m4k25.remote import ChristieRemote, power_state_to_remote_state
-from uc_intg_christie_m4k25.select import ChristieInputSelect, ChristieTestPatternSelect
+from uc_intg_christie_m4k25.select import (
+    ChristieInputSelect,
+    ChristieTestPatternSelect,
+    ChristieThreeDModeSelect,
+    ChristieThreeDSyncOutputSelect,
+)
 from uc_intg_christie_m4k25.sensor import (
     build_alarms_sensor,
     build_hours_sensor,
     build_input_name_sensor,
     build_intake_temperature_sensor,
     build_status_sensor,
+    build_three_d_darktime_sensor,
+    build_three_d_sync_sensor,
 )
 from uc_intg_christie_m4k25.setup import ChristieSetup
-from uc_intg_christie_m4k25.switch import ChristieLiteLocSwitch, ChristieShutterSwitch
+from uc_intg_christie_m4k25.switch import (
+    ChristieLiteLocSwitch,
+    ChristieShutterSwitch,
+    ChristieThreeDInvertSwitch,
+    ChristieThreeDTestPatternSwitch,
+)
 
 _LOG = logging.getLogger(__name__)
 
@@ -59,6 +71,12 @@ _input_name_sensor: ucapi.Sensor | None = None
 _hours_sensor: ucapi.Sensor | None = None
 _intake_temperature_sensor: ucapi.Sensor | None = None
 _alarms_sensor: ucapi.Sensor | None = None
+_three_d_mode_select: ChristieThreeDModeSelect | None = None
+_three_d_sync_output_select: ChristieThreeDSyncOutputSelect | None = None
+_three_d_invert_switch: ChristieThreeDInvertSwitch | None = None
+_three_d_test_pattern_switch: ChristieThreeDTestPatternSwitch | None = None
+_three_d_sync_sensor: ucapi.Sensor | None = None
+_three_d_darktime_sensor: ucapi.Sensor | None = None
 
 # Every entity type's States enum defines the same literal value for this
 # common state (see entity.py's CommonStates), so one plain string covers all
@@ -121,11 +139,39 @@ async def _apply_snapshot(snapshot: Snapshot) -> None:
         {ucapi.select.Attributes.CURRENT_OPTION: snapshot.test_pattern},
     )
     _update(
+        _three_d_mode_select.id if _three_d_mode_select else None,
+        {ucapi.select.Attributes.CURRENT_OPTION: snapshot.three_d_mode},
+    )
+    _update(
+        _three_d_sync_output_select.id if _three_d_sync_output_select else None,
+        {ucapi.select.Attributes.CURRENT_OPTION: snapshot.three_d_sync_output},
+    )
+    _update(
         _shutter_switch.id if _shutter_switch else None,
         {
             ucapi.switch.Attributes.STATE: (
                 ucapi.switch.States.ON
                 if snapshot.shutter_open
+                else ucapi.switch.States.OFF
+            )
+        },
+    )
+    _update(
+        _three_d_invert_switch.id if _three_d_invert_switch else None,
+        {
+            ucapi.switch.Attributes.STATE: (
+                ucapi.switch.States.ON
+                if snapshot.three_d_input_inverted
+                else ucapi.switch.States.OFF
+            )
+        },
+    )
+    _update(
+        _three_d_test_pattern_switch.id if _three_d_test_pattern_switch else None,
+        {
+            ucapi.switch.Attributes.STATE: (
+                ucapi.switch.States.ON
+                if snapshot.three_d_test_pattern
                 else ucapi.switch.States.OFF
             )
         },
@@ -174,6 +220,21 @@ async def _apply_snapshot(snapshot: Snapshot) -> None:
             ucapi.sensor.Attributes.VALUE: "on" if snapshot.alarms > 0 else "off",
         },
     )
+    # The projector's own wording; "" when it did not report the item.
+    _update(
+        _three_d_sync_sensor.id if _three_d_sync_sensor else None,
+        {
+            ucapi.sensor.Attributes.STATE: ucapi.sensor.States.ON,
+            ucapi.sensor.Attributes.VALUE: snapshot.three_d_sync,
+        },
+    )
+    _update(
+        _three_d_darktime_sensor.id if _three_d_darktime_sensor else None,
+        {
+            ucapi.sensor.Attributes.STATE: ucapi.sensor.States.ON,
+            ucapi.sensor.Attributes.VALUE: snapshot.three_d_darktime,
+        },
+    )
 
 
 async def _apply_unavailable() -> None:
@@ -187,6 +248,8 @@ async def _apply_unavailable() -> None:
         (_remote, ucapi.remote.Attributes),
         (_shutter_switch, ucapi.switch.Attributes),
         (_liteloc_switch, ucapi.switch.Attributes),
+        (_three_d_invert_switch, ucapi.switch.Attributes),
+        (_three_d_test_pattern_switch, ucapi.switch.Attributes),
     ):
         if entity:
             _update(entity.id, {attr_cls.STATE: _UNAVAILABLE})
@@ -196,10 +259,17 @@ async def _apply_unavailable() -> None:
         _hours_sensor,
         _intake_temperature_sensor,
         _alarms_sensor,
+        _three_d_sync_sensor,
+        _three_d_darktime_sensor,
     ):
         if sensor:
             _update(sensor.id, {ucapi.sensor.Attributes.STATE: _UNAVAILABLE})
-    for select_entity in (_input_select, _test_pattern_select):
+    for select_entity in (
+        _input_select,
+        _test_pattern_select,
+        _three_d_mode_select,
+        _three_d_sync_output_select,
+    ):
         if select_entity:
             _update(select_entity.id, {ucapi.select.Attributes.STATE: _UNAVAILABLE})
     await api.set_device_state(DeviceStates.DISCONNECTED)
@@ -211,6 +281,9 @@ def _initialize_entities() -> bool:
     global _shutter_switch, _liteloc_switch
     global _status_sensor, _input_name_sensor, _hours_sensor
     global _intake_temperature_sensor, _alarms_sensor
+    global _three_d_mode_select, _three_d_sync_output_select
+    global _three_d_invert_switch, _three_d_test_pattern_switch
+    global _three_d_sync_sensor, _three_d_darktime_sensor
 
     if not _config or not _config.is_configured():
         _LOG.info("Integration not configured yet")
@@ -232,6 +305,12 @@ def _initialize_entities() -> bool:
         _hours_sensor = build_hours_sensor(_config)
         _intake_temperature_sensor = build_intake_temperature_sensor(_config)
         _alarms_sensor = build_alarms_sensor(_config)
+        _three_d_mode_select = ChristieThreeDModeSelect(_config, _device)
+        _three_d_sync_output_select = ChristieThreeDSyncOutputSelect(_config, _device)
+        _three_d_invert_switch = ChristieThreeDInvertSwitch(_config, _device)
+        _three_d_test_pattern_switch = ChristieThreeDTestPatternSwitch(_config, _device)
+        _three_d_sync_sensor = build_three_d_sync_sensor(_config)
+        _three_d_darktime_sensor = build_three_d_darktime_sensor(_config)
 
         api.available_entities.clear()
         for entity in (
@@ -246,6 +325,12 @@ def _initialize_entities() -> bool:
             _hours_sensor,
             _intake_temperature_sensor,
             _alarms_sensor,
+            _three_d_mode_select,
+            _three_d_sync_output_select,
+            _three_d_invert_switch,
+            _three_d_test_pattern_switch,
+            _three_d_sync_sensor,
+            _three_d_darktime_sensor,
         ):
             api.available_entities.add(entity)
 

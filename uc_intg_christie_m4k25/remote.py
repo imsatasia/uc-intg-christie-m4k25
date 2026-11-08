@@ -58,7 +58,7 @@ class ChristieRemote(Remote):
             features=[Features.ON_OFF, Features.TOGGLE, Features.SEND_CMD],
             attributes={Attributes.STATE: States.UNKNOWN},
             simple_commands=list(const.SIMPLE_COMMANDS),
-            ui_pages=[self._create_control_page()],
+            ui_pages=[self._create_control_page(), self._create_3d_page()],
             cmd_handler=self.command_handler,
         )
 
@@ -87,6 +87,22 @@ class ChristieRemote(Remote):
         page.add(create_ui_text("Lens Right", 2, 4, cmd=const.CMD_LENS_RIGHT))
         page.add(create_ui_text("Lens Down", 1, 5, cmd=const.CMD_LENS_DOWN))
         page.add(create_ui_text("Calibrate Lens", 2, 5, cmd=const.CMD_LENS_CALIBRATE))
+        return page
+
+    def _create_3d_page(self) -> UiPage:
+        """3D mode shortcuts, the sync test pattern, and nudges for the two
+        values with no number entity to put on a slider. The sync delay and
+        dark interval only take effect in the packed 3D modes."""
+        page = UiPage(page_id="christie_3d", name="Christie 3D", grid=Size(4, 8))
+        page.add(create_ui_text("3D Off", 0, 0, cmd=const.CMD_3D_OFF))
+        page.add(create_ui_text("3D Auto", 1, 0, cmd=const.CMD_3D_AUTO))
+        page.add(create_ui_text("3D Test On", 2, 0, cmd=const.CMD_3D_TEST_ON))
+        page.add(create_ui_text("3D Test Off", 3, 0, cmd=const.CMD_3D_TEST_OFF))
+
+        page.add(create_ui_text("Delay +", 0, 1, cmd=const.CMD_3D_DELAY_UP))
+        page.add(create_ui_text("Delay -", 1, 1, cmd=const.CMD_3D_DELAY_DOWN))
+        page.add(create_ui_text("Dark +", 2, 1, cmd=const.CMD_3D_DARK_UP))
+        page.add(create_ui_text("Dark -", 3, 1, cmd=const.CMD_3D_DARK_DOWN))
         return page
 
     async def command_handler(
@@ -172,4 +188,18 @@ def _build_command_map(device: ChristieDevice) -> dict[str, Any]:
         const.CMD_LENS_DOWN: lambda: device.step_lens_vertical(-const.LENS_STEP),
         const.CMD_LENS_LEFT: lambda: device.step_lens_horizontal(-const.LENS_STEP),
         const.CMD_LENS_RIGHT: lambda: device.step_lens_horizontal(const.LENS_STEP),
+        const.CMD_3D_OFF: lambda: device.set_3d_mode("Off"),
+        const.CMD_3D_AUTO: lambda: device.set_3d_mode("Auto Detect"),
+        const.CMD_3D_TEST_ON: lambda: device.set_3d_test_pattern(True),
+        const.CMD_3D_TEST_OFF: lambda: device.set_3d_test_pattern(False),
+        const.CMD_3D_DELAY_UP: lambda: device.step_3d_delay(const.THREE_D_DELAY_STEP),
+        const.CMD_3D_DELAY_DOWN: lambda: device.step_3d_delay(
+            -const.THREE_D_DELAY_STEP
+        ),
+        const.CMD_3D_DARK_UP: lambda: device.step_3d_dark_interval(
+            const.THREE_D_DARK_INTERVAL_STEP
+        ),
+        const.CMD_3D_DARK_DOWN: lambda: device.step_3d_dark_interval(
+            -const.THREE_D_DARK_INTERVAL_STEP
+        ),
     }

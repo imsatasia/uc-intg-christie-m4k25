@@ -5,6 +5,12 @@ text, so the library's own port-label/test-pattern names (INPUTS/
 TEST_PATTERNS from py-christie-mseries) are used verbatim as the option
 lists -- no separate label mapping to keep in sync.
 
+The 3D mode and 3D sync output selects work the same way, using the library's
+THREE_D_MODES/THREE_D_SYNC_OUTPUTS names. The projector refuses the sync output
+outside the packed 3D modes ("Disabled Control"), which surfaces as a CONFLICT
+like any other refused command rather than as a greyed-out entity -- ucapi's
+select has no availability dimension besides the whole entity being UNAVAILABLE.
+
 Input is also reachable via the media_player entity's select_source feature
 (media_player.py) -- that's the more natural home for it, since select_source
 is a first-class media_player concept for exactly this. This select entity is
@@ -23,7 +29,12 @@ from __future__ import annotations
 import logging
 from typing import Any, Awaitable, Callable
 
-from christie_mseries import INPUTS, TEST_PATTERNS
+from christie_mseries import (
+    INPUTS,
+    TEST_PATTERNS,
+    THREE_D_MODES,
+    THREE_D_SYNC_OUTPUTS,
+)
 from ucapi import StatusCodes
 from ucapi.select import Attributes, Commands, Select
 
@@ -34,6 +45,8 @@ _LOG = logging.getLogger(__name__)
 
 _INPUT_LIST = list(INPUTS.values())
 _TEST_PATTERN_LIST = list(TEST_PATTERNS.values())
+_THREE_D_MODE_LIST = list(THREE_D_MODES.values())
+_THREE_D_SYNC_OUTPUT_LIST = list(THREE_D_SYNC_OUTPUTS.values())
 
 
 class _ChristieSelect(Select):
@@ -113,4 +126,32 @@ class ChristieTestPatternSelect(_ChristieSelect):
             options=_TEST_PATTERN_LIST,
             current_option=TEST_PATTERNS[0],
             apply=device.set_test_pattern,
+        )
+
+
+class ChristieThreeDModeSelect(_ChristieSelect):
+    """Selects the 3D mode (TDM): Off, Auto Detect, Multi-Flash and the three
+    packed formats."""
+
+    def __init__(self, config: ChristieConfig, device: ChristieDevice) -> None:
+        super().__init__(
+            identifier=entity_id("select", config.host, "3d_mode"),
+            name=f"{config.name} 3D Mode",
+            options=_THREE_D_MODE_LIST,
+            current_option=THREE_D_MODES[0],
+            apply=device.set_3d_mode,
+        )
+
+
+class ChristieThreeDSyncOutputSelect(_ChristieSelect):
+    """Selects where the 3D sync signal goes (TDO). Only accepted in the
+    packed 3D modes."""
+
+    def __init__(self, config: ChristieConfig, device: ChristieDevice) -> None:
+        super().__init__(
+            identifier=entity_id("select", config.host, "3d_sync_output"),
+            name=f"{config.name} 3D Sync Output",
+            options=_THREE_D_SYNC_OUTPUT_LIST,
+            current_option=THREE_D_SYNC_OUTPUTS[0],
+            apply=device.set_3d_sync_output,
         )
